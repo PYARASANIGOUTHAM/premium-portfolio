@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --color-apple-gray-50: #fbfbfd;
+  --color-apple-gray-100: #f5f5f7;
+  --color-apple-gray-800: #1d1d1f;
+  --color-apple-gray-900: #000000;
+  --color-accent: #2997ff;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-apple-gray-50 text-apple-gray-800 antialiased transition-colors duration-300;
+  }
+  
+  .dark body {
+    @apply bg-apple-gray-900 text-apple-gray-50;
+  }
+
+  .blink {
+    animation: blink-cursor 0.8s step-end infinite;
+  }
+
+  @keyframes blink-cursor {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+  }
+}
+
+/* Glassmorphism utility classes */
+@layer utilities {
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-sm dark:bg-black/50 dark:border-white/10 dark:shadow-none;
+  }
+  .glass-card {
+    @apply bg-white/60 backdrop-blur-lg border border-white/20 shadow-xl rounded-2xl dark:bg-apple-gray-800/60 dark:border-white/10;
+  }
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-apple-gray-800 to-gray-500 dark:from-white dark:to-gray-400;
+  }
+  .text-gradient-accent {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-accent to-blue-400;
+  }
+}
