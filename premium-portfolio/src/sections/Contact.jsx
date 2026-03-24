@@ -1,11 +1,39 @@
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiSend, FiMail, FiMapPin, FiPhone } from 'react-icons/fi';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function Contact() {
-  const handleSubmit = (e) => {
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [status, setStatus] = useState({ loading: false, error: '', success: '' });
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setForm((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real app, this would send an email or save to a database
-    alert("Thanks for your message! I'll get back to you soon.");
+    setStatus({ loading: true, error: '', success: '' });
+
+    try {
+      const response = await fetch(`${API_URL}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message. Please try again later.');
+      }
+
+      const data = await response.json();
+      setStatus({ loading: false, error: '', success: data.message || 'Message sent successfully!' });
+      setForm({ name: '', email: '', subject: '', message: '' });
+    } catch (err) {
+      setStatus({ loading: false, error: err.message || 'Unable to send message.', success: '' });
+    }
   };
 
   return (
@@ -78,6 +106,8 @@ export default function Contact() {
                   <input 
                     type="text" 
                     id="name" 
+                    value={form.name}
+                    onChange={handleChange}
                     required 
                     className="w-full px-4 py-3 bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all font-light"
                     placeholder="John Doe"
@@ -88,6 +118,8 @@ export default function Contact() {
                   <input 
                     type="email" 
                     id="email" 
+                    value={form.email}
+                    onChange={handleChange}
                     required 
                     className="w-full px-4 py-3 bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all font-light"
                     placeholder="john@example.com"
@@ -99,6 +131,8 @@ export default function Contact() {
                 <input 
                   type="text" 
                   id="subject" 
+                  value={form.subject}
+                  onChange={handleChange}
                   required 
                   className="w-full px-4 py-3 bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all font-light"
                   placeholder="Project Inquiry"
@@ -109,16 +143,23 @@ export default function Contact() {
                 <textarea 
                   id="message" 
                   rows="4" 
+                  value={form.message}
+                  onChange={handleChange}
                   required 
                   className="w-full px-4 py-3 bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all resize-none font-light"
                   placeholder="How can I help you?"
                 ></textarea>
               </div>
+
+              {status.error && <p className="text-sm text-red-600 dark:text-red-400">{status.error}</p>}
+              {status.success && <p className="text-sm text-green-600 dark:text-green-400">{status.success}</p>}
+
               <button 
                 type="submit" 
-                className="px-8 py-4 bg-apple-gray-900 dark:bg-apple-gray-50 text-white dark:text-black rounded-full font-medium flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300 cursor-pointer shadow-lg w-full md:w-auto mt-4 border border-transparent"
+                disabled={status.loading}
+                className={`px-8 py-4 rounded-full font-medium flex items-center justify-center gap-2 transition-transform duration-300 cursor-pointer shadow-lg w-full md:w-auto mt-4 border border-transparent ${status.loading ? 'bg-gray-400 text-gray-200' : 'bg-apple-gray-900 dark:bg-apple-gray-50 text-white dark:text-black hover:scale-105'}`}
               >
-                Send Message <FiSend />
+                {status.loading ? 'Sending...' : 'Send Message'} <FiSend />
               </button>
             </form>
           </motion.div>
