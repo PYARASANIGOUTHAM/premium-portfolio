@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -11,14 +12,11 @@ app.use(express.json());
 // MongoDB connection
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/premiumPortfolio";
 
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(MONGO_URI)
   .then(() => console.log("MongoDB connected:" + MONGO_URI))
   .catch((error) => {
     console.error("MongoDB connection error:", error);
-    process.exit(1);
+    // process.exit(1); // Commented out to allow server to run without DB
   });
 
 // Contact model
