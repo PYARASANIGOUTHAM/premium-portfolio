@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiSend, FiMail, FiMapPin, FiPhone } from 'react-icons/fi';
 

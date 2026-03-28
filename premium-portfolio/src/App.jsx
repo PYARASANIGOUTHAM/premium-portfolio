@@ -1,54 +1,65 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
+import { Toaster } from 'react-hot-toast';
+import PrivateRoute from './components/PrivateRoute';
+import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import { useTheme } from './hooks/useTheme';
-import Hero from './sections/Hero';
-import About from './sections/About';
-import Projects from './sections/Projects';
-import Skills from './sections/Skills';
-import Contact from './sections/Contact';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Messages from './pages/Messages';
+import { isAuthenticated, clearToken } from './utils/auth';
 
 function App() {
-  const { theme, toggleTheme } = useTheme();
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    clearToken();
+    navigate('/login');
+  };
+
+  const toggleTheme = () => setDarkMode((prev) => !prev);
 
   useEffect(() => {
-    const onScroll = () => {
-      const scrollTop = window.pageYOffset;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (docHeight > 0) {
-        setScrollProgress(Math.min(100, Math.max(0, (scrollTop / docHeight) * 100)));
-      }
-    };
-
-    window.addEventListener('scroll', onScroll);
-    onScroll();
-
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+    const root = window.document.documentElement;
+    if (darkMode) root.classList.add('dark');
+    else root.classList.remove('dark');
+  }, [darkMode]);
 
   return (
-    <div className="min-h-screen relative overflow-hidden font-sans">
-      <div className="fixed top-0 left-0 h-1 z-50 bg-accent transition-all duration-150" style={{ width: `${scrollProgress}%` }} />
+    <div className="min-h-screen bg-apple-gray-50 dark:bg-apple-gray-950">
+      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+      <div className="flex h-screen overflow-hidden">
+        <Sidebar collapsed={!sidebarOpen} onLogout={handleLogout} />
 
-      {/* Dynamic Background Elements */}
-      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-accent/20 blur-[120px] -z-10 mix-blend-multiply dark:mix-blend-screen pointer-events-none" />
-      <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-500/20 blur-[120px] -z-10 mix-blend-multiply dark:mix-blend-screen pointer-events-none" />
+        <div className="flex flex-1 flex-col transition-all duration-300" style={{ marginLeft: sidebarOpen ? 250 : 64 }}>
+          <Navbar
+            adminName="Admin"
+            onLogout={handleLogout}
+            onToggleTheme={toggleTheme}
+            isDark={darkMode}
+            onMenuToggle={() => setSidebarOpen((prev) => !prev)}
+          />
 
-      <Navbar theme={theme} toggleTheme={toggleTheme} />
-      
-      <motion.main initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="scroll-smooth">
-        <Hero />
-        <About />
-        <Projects />
-        <Skills />
-        <Contact />
-      </motion.main>
-
-      <Footer />
+          <main className="overflow-y-auto px-4 py-6">
+            <AnimatePresence mode="wait">
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route element={<PrivateRoute />}>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/messages" element={<Messages />} />
+                </Route>
+                <Route path="*" element={<Navigate to={isAuthenticated() ? '/' : '/login'} replace />} />
+              </Routes>
+            </AnimatePresence>
+          </main>
+        </div>
+      </div>
     </div>
   );
 }
 
 export default App;
+

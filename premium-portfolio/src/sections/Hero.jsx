@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiArrowRight, FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
 
@@ -8,7 +8,10 @@ export default function Hero() {
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [speed, setSpeed] = useState(120);
 
-  const phrases = ['Frontend Developer', 'UI/UX Designer', 'React Architect', 'Motion Expert'];
+  const phrases = useMemo(
+    () => ['Frontend Developer', 'UI/UX Designer', 'React Architect', 'Motion Expert'],
+    []
+  );
 
   useEffect(() => {
     const currentPhrase = phrases[phraseIndex % phrases.length];
@@ -33,9 +36,12 @@ export default function Hero() {
     }
 
     if (isDeleting && typedText === '') {
-      setIsDeleting(false);
-      setPhraseIndex((prev) => (prev + 1) % phrases.length);
-      setSpeed(100);
+      const timeout = setTimeout(() => {
+        setIsDeleting(false);
+        setPhraseIndex((prev) => (prev + 1) % phrases.length);
+        setSpeed(100);
+      }, 500);
+      return () => clearTimeout(timeout);
     }
   }, [typedText, isDeleting, phraseIndex, phrases, speed]);
 

@@ -1,4 +1,3 @@
-import React from 'react';
 import { FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
 
 export default function Footer() {
