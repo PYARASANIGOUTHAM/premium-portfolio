@@ -74,14 +74,16 @@ export default function Hero() {
           </motion.div>
           
           <motion.h1 variants={itemVariants} className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-6 relative">
-            Hi, I'm <span className="text-gradient">Alex Dev</span>
+            Hi, I'm <span className="text-gradient">Goutham</span>
           </motion.h1>
           <motion.p variants={itemVariants} className="text-2xl md:text-4xl font-semibold text-accent mb-4">
-            {typedText || 'Building digital experiences...'}
-            <span className="text-accent blink">|</span>
+            Full Stack Developer / AI Enthusiast
+          </motion.p>
+          <motion.p variants={itemVariants} className="text-2xl md:text-4xl font-semibold text-cyan-300 mb-4">
+            {typedText || 'Crafting impactful experiences'}<span className="text-accent blink">|</span>
           </motion.p>
           <motion.p variants={itemVariants} className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl font-light">
-            I craft stunning, world-class digital experiences with React.js, Tailwind CSS, and Framer Motion. Building products that look and feel Apple-level premium.
+            Visionary modern web products optimized for speed, accessibility, and emotional design. Experience AI-powered interfaces that feel alive.
           </motion.p>
           
           <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">

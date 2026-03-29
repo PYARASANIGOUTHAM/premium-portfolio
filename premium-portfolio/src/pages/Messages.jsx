@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import MessageTable from '../components/MessageTable';
@@ -12,7 +12,7 @@ export default function Messages() {
   const [pageSize] = useState(8);
   const [total, setTotal] = useState(0);
 
-  const loadMessages = async (pageToLoad = 1) => {
+  const loadMessages = useCallback(async (pageToLoad = 1) => {
     setLoading(true);
     setError('');
     try {
@@ -27,11 +27,11 @@ export default function Messages() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pageSize]);
 
   useEffect(() => {
     loadMessages(page);
-  }, [page]);
+  }, [page, loadMessages]);
 
   const sorted = useMemo(
     () => [...messages].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),

@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { loginAdmin, setToken, isAuthenticated } from '../utils/auth';
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from?.pathname || '/';
   const [email, setEmail] = useState('admin@example.com');
   const [password, setPassword] = useState('password');
   const [error, setError] = useState('');
@@ -32,7 +34,7 @@ export default function Login() {
 
       setToken(token);
       toast.success('Login successful');
-      navigate('/');
+      navigate(redirectTo, { replace: true });
     } catch (err) {
       const message = err.response?.data?.message || err.message || 'Invalid credentials. Use admin@example.com/password';
       setError(message);
