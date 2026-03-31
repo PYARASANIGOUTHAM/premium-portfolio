@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 const app = express();
 
@@ -34,6 +35,14 @@ const contactSchema = new mongoose.Schema({
 
 const Contact = mongoose.model("Contact", contactSchema);
 
+// User model
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+});
+const User = mongoose.model("User", userSchema);
 
 // Test route
 app.get("/", (req, res) => {
@@ -123,6 +132,43 @@ app.delete('/admin/messages/:id', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error deleting message:', error);
     return res.status(500).json({ message: 'Unable to delete message' });
+  }
+});
+
+// User Auth routes
+app.post('/auth/signup', async (req, res) => {
+  const { name, email, password } = req.body;
+  if (!name || !email || !password) return res.status(400).json({ message: 'Name/email/password required' });
+
+  try {
+    const existing = await User.findOne({ email });
+    if (existing) return res.status(409).json({ message: 'Email already exists' });
+
+    const hash = await bcrypt.hash(password, 10);
+    const user = await User.create({ name, email, password: hash });
+    const token = jwt.sign({ sub: user._id, email: user.email, name: user.name, role: 'user' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+
+    res.status(201).json({ user: { id: user._id, name: user.name, email: user.email }, token });
+  } catch (err) {
+    console.error('Signup error:', err);
+    res.status(500).json({ message: 'Signup failed' });
+  }
+});
+
+app.post('/auth/login', async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ message: 'Email/password required' });
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user || !(await bcrypt.compare(password, user.password)))
+      return res.status(401).json({ message: 'Invalid credentials' });
+
+    const token = jwt.sign({ sub: user._id, email: user.email, name: user.name, role: 'user' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+    res.json({ user: { id: user._id, name: user.name, email: user.email }, token });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ message: 'Login failed' });
   }
 });
 
